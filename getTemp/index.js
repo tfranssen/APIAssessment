@@ -1,9 +1,15 @@
+'use strict'
 console.log('Loading function');
 
 const fetch = require('node-fetch');
+const MongoClient = require('mongodb').MongoClient;
 
-exports.handler = async (event) => {
+const uri = "mongodb+srv://dbuser:admin@firstcluster-qi6mu.mongodb.net/test?retryWrites=true&w=majority"
+
+
+async function hello() {
   try {
+    //Get temperature from Yahoo Weather service
     const url = 'https://weather-ydn-yql.media.yahoo.com/public/forecastrss?location=covilha,pt&format=json&u=c'; // u=c means celsius
     const respWeather = await fetch(url);
     const body = await respWeather.json();
@@ -14,6 +20,27 @@ exports.handler = async (event) => {
     console.log(temperature);
     console.log(pubDate);
     console.log(pubDateMillis.toDateString());
+    //Write to DB
+    MongoClient.connect(uri, {useUnifiedTopology: true}, function(err, db) {
+      if(err) {
+           console.log('Error occurred while connecting to MongoDB Atlas...\n',err);
+      }
+      var dbo = db.db('Weather');
+      console.log('database connected!');
+      var collection = dbo.collection('Temps');
+      let data = {"timestamp": Math.round(Date.now()/1000), "city": "Covilha", "pubdate": pubDate, "temp": temperature};
+      collection.insertOne(data, (err, result) => {
+          if(err) {
+              console.log(err);
+              process.exit(0);
+          }
+          console.log("");
+          db.close();
+      });
+   });
+
+
+    //Write response
     const response = {
       statusCode: 200,
       body: JSON.stringify({temperature, pubDate, pubDateStr}),
@@ -27,3 +54,5 @@ exports.handler = async (event) => {
     return response
   }
 };
+
+hello();
