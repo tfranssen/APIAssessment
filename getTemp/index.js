@@ -7,7 +7,7 @@ const MongoClient = require('mongodb').MongoClient;
 const uri = "mongodb+srv://dbuser:admin@firstcluster-qi6mu.mongodb.net/test?retryWrites=true&w=majority"
 
 
-async function hello() {
+exports.handler = async (event) => {
   try {
     //Get temperature from Yahoo Weather service
     const url = 'https://weather-ydn-yql.media.yahoo.com/public/forecastrss?location=covilha,pt&format=json&u=c'; // u=c means celsius
@@ -28,7 +28,7 @@ async function hello() {
       var dbo = db.db('Weather');
       console.log('database connected!');
       var collection = dbo.collection('Temps');
-      let data = {"timestamp": Math.round(Date.now()/1000), "city": "Covilha", "pubdate": pubDate, "temp": temperature};
+      let data = {"timestamp": Math.round(Date.now()/1000), "city": "Covilhanpm", "pubdate": pubDate, "temp": temperature};
       collection.insertOne(data, (err, result) => {
           if(err) {
               console.log(err);
@@ -54,5 +54,3 @@ async function hello() {
     return response
   }
 };
-
-hello();
