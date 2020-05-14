@@ -20,14 +20,20 @@ jobs:
 
     steps:
     - uses: actions/checkout@v2
+    - uses: chrislennon/action-aws-cli@v1.1      
     - name: Use Node.js ${{ matrix.node-version }}
       uses: actions/setup-node@v1
       with:
         node-version: ${{ matrix.node-version }}
-    - run: npm ci
-    - run: npm run build --if-present
-    - uses: chrislennon/action-aws-cli@v1.1
-    - run: aws s3 ls
+    - name: Install Clean Slate
+      working-directory: ./getTemp
+      run: npm ci
+    - name: Build package
+      working-directory: ./getTemp
+      run: npm run build --if-present
+    - name: Push to AWS
+      working-directory: ./getTemp
+      run: aws lambda update-function-code --function-name currentTempInCovilha --zip-file fileb://getTemp.zip --output text &> /dev/null
       env:
           AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
           AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
