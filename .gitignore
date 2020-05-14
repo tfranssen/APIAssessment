@@ -34,6 +34,9 @@ Temporary Items
 ### VisualStudioCode ###
 */.vscode/*
 
+*/node_modules/*
+*/*.zip
+
 ### VisualStudioCode Patch ###
 # Ignore all local history of files
 .history
