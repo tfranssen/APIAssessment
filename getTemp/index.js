@@ -20,8 +20,6 @@ exports.handler = async () => {
     const pubDateStr = pubDateMillis.toDateString();
     //Create document for MongoDB
     const data = {"timestamp": Math.round(Date.now()/1000), "pubdate": pubDate, "temp": temperature};
-    const doc = data; 
-    console.log(data);
     
     //Write to DB
     try {
@@ -30,8 +28,8 @@ exports.handler = async () => {
       Client.on('connect', () => {
         console.log('Database connected');
       });
-      //Write to collection Temps
-      await Client.Temps.insert(doc);
+      //Write
+      await Client.Temps.insert(data);
       Client.close();
     } catch (err) {
       console.log(err);
@@ -41,7 +39,7 @@ exports.handler = async () => {
     //Write response
     const response = {
       statusCode: 200,
-      body: data,
+      body: {"timestamp": Math.round(Date.now()/1000), "pubdate": pubDate, "temp": temperature},
     }
     return response
   } catch (err) {
