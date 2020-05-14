@@ -19,7 +19,7 @@ exports.handler = async () => {
     const pubDateMillis = new Date(pubDate*1000);
     const pubDateStr = pubDateMillis.toDateString();
     //Create document for MongoDB
-    const data = {"timestamp": Math.round(Date.now()/1000), "pubdate": pubDate, "temp": temperature};
+    const data = {"timestamp": Math.round(Date.now()/1000), "pubdate": pubDate, "temp": 150};
     
     //Write to DB
     try {
