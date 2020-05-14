@@ -1,10 +1,14 @@
 'use strict'
-console.log('Loading function');
-
+//Load libraries
 const fetch = require('node-fetch');
+const mongoist = require('mongoist');
+
+let MONGODB_URI;
 
 //async function main(){ 
-exports.handler = async () => {  
+exports.handler = async () => {
+  //Get connection string from AWS environment variables 
+  MONGODB_URI = process.env['URI_MONGO_DB']
   try {
     //Get temperature from Yahoo Weather service
     const url = 'https://weather-ydn-yql.media.yahoo.com/public/forecastrss?location=covilha,pt&format=json&u=c'; // u=c means celsius
@@ -14,12 +18,26 @@ exports.handler = async () => {
     const pubDate = body.current_observation.pubDate;
     const pubDateMillis = new Date(pubDate*1000);
     const pubDateStr = pubDateMillis.toDateString();
-    //console.log(temperature);
-    //console.log(pubDate);
-    //console.log(pubDateMillis.toDateString());
+    //Create document for MongoDB
     const data = {"timestamp": Math.round(Date.now()/1000), "pubdate": pubDate, "temp": temperature};
+    const doc = data; 
     console.log(data);
-  
+    
+    //Write to DB
+    try {
+      //Make connection
+      const Client = mongoist(MONGODB_URI);
+      Client.on('connect', () => {
+        console.log('Database connected');
+      });
+      //Write to collection Temps
+      await Client.Temps.insert(doc);
+      Client.close();
+    } catch (err) {
+      console.log(err);
+    }
+    console.log(data);
+
     //Write response
     const response = {
       statusCode: 200,
@@ -34,5 +52,3 @@ exports.handler = async () => {
     return response
   }
 };
-
-//main();
