@@ -19,7 +19,7 @@ exports.handler = async () => {
     const pubDateMillis = new Date(pubDate*1000);
     const pubDateStr = pubDateMillis.toDateString();
     //Create document for MongoDB
-    const data = {"timestamp": Math.round(Date.now()/1000), "pubdate": pubDate, "temp": 150};
+    const data = {"timestamp": Math.round(Date.now()/1000), "pubdate": pubDate, "temp": temperature};
     
     //Write to DB
     try {
@@ -39,7 +39,7 @@ exports.handler = async () => {
     //Write response
     const response = {
       statusCode: 200,
-      body: {"timestamp": Math.round(Date.now()/1000), "pubdate": pubDate, "temp": temperature},
+      body: {"timestamp": Math.round(Date.now()/1000), "pubdate": pubDate, "temp": 150},
     }
     return response
   } catch (err) {
