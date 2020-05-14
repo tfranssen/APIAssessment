@@ -39,7 +39,7 @@ exports.handler = async () => {
     //Write response
     const response = {
       statusCode: 200,
-      body: {"timestamp": Math.round(Date.now()/1000), "pubdate": pubDate, "temp": 150},
+      body: {"timestamp": Math.round(Date.now()/1000), "pubdate": pubDate, "temp": temperature},
     }
     return response
   } catch (err) {
