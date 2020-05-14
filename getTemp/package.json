@@ -9,7 +9,6 @@
   "author": "",
   "license": "ISC",
   "dependencies": {
-    "mongodb": "^3.5.7",
     "node-fetch": "^2.6.0"
   }
 }
