@@ -38,7 +38,7 @@ jobs:
       run: npm ci
     - name: Zip package
       working-directory: ./getTemp 
-      run: rm getTemp.zip  && zip -r getTemp.zip .  
+      run: rm -f getTemp.zip  && zip -r getTemp.zip .  
     - name: Copy to AWS
       working-directory: ./getTemp
       run: aws s3 cp getTemp.zip s3://${{ secrets.BucketName }}/getTemp.zip
