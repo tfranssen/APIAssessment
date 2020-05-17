@@ -111,7 +111,7 @@ Resources:
       FunctionName: 'CurrentTemp-function'
       Code:
         S3Bucket: !Ref S3BucketName
-        S3Key: !Sub getTemp.zip
+        S3Key: !Sub getTemp-${CurrentTempFunctionVersion}.zip
       Handler: index.handler
       MemorySize: 1024
       Role: !GetAtt LambdaIamRole.Arn

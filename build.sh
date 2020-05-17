@@ -9,6 +9,15 @@ echo "New version"
 echo "Current version"
 cat version.env | grep version 
 
+echo "Upload getTemp function"
+cd getTemp
+
+npm ci
+rm -f getTemp.zip  && zip -r getTemp.zip .
+aws s3 cp getTemp.zip s3://$S3_BUCKET_NAME/getTemp-$version.zip
+rm -f getTemp.zip
+rm -f -r node_modules
+cd ..
 
 echo "Validating stack..."
 aws cloudformation validate-template --template-body file://cloudformation.yaml
@@ -21,8 +30,4 @@ aws cloudformation update-stack \
   --parameters \
   ParameterKey=S3BucketName,ParameterValue=$S3_BUCKET_NAME \
   ParameterKey=CurrentTempFunctionVersion,ParameterValue=$version \
-  ParameterKey=MongoDBURI,ParameterValue=$URI_MONGO_DB \
-
-echo "Updating..."
-
-aws cloudformation wait stack-update-complete --stack-name $STACK_NAME
+  ParameterKey=MongoDBURI,ParameterValue=$URI_MONGO_DB 
