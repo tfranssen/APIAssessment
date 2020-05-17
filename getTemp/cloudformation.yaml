@@ -1,0 +1,136 @@
+AWSTemplateFormatVersion: '2010-09-09'
+
+Description: AWS API Gateway with a Lambda Integration
+Parameters:
+  StageName:
+    Type: "String"
+    AllowedPattern: "^[a-z0-9]+$"
+    Default: 'v0'
+
+  CurrentTempFunctionVersion:
+    Description: "Version of the Current Temp lambda function required to update existing stack"
+    Type: String
+    Default: "latest"
+
+  S3BucketName:
+    Description: "S3BucketName"
+    Type: "String"
+
+  MongoDBURI:
+    Description: "URI MongoDB Atlas"
+    Type: "String"
+
+Resources:
+
+  ApiGatewayRestApi:
+    Type: AWS::ApiGateway::RestApi
+    Properties:
+      ApiKeySourceType: HEADER
+      Description: An API Gateway with a Lambda Integration
+      EndpointConfiguration:
+        Types:
+          - EDGE
+      Name: WeatherAPI
+
+  CurrentTempResource:
+    Type: AWS::ApiGateway::Resource
+    Properties:
+      ParentId: !GetAtt ApiGatewayRestApi.RootResourceId
+      PathPart: 'currenttempincovilha'
+      RestApiId: !Ref ApiGatewayRestApi
+
+
+  CurrentTempMethod:
+    Type: AWS::ApiGateway::Method
+    Properties:
+      ApiKeyRequired: false
+      AuthorizationType: NONE
+      HttpMethod: ANY
+      Integration:
+        ConnectionType: INTERNET
+        Credentials: !GetAtt ApiGatewayIamRole.Arn
+        IntegrationHttpMethod: POST
+        PassthroughBehavior: WHEN_NO_MATCH
+        TimeoutInMillis: 29000
+        Type: AWS_PROXY
+        Uri: !Sub 'arn:aws:apigateway:${AWS::Region}:lambda:path/2015-03-31/functions/${CurrentTempFunction.Arn}/invocations'
+      OperationName: 'currenttempincovilha'
+      ResourceId: !Ref CurrentTempResource
+      RestApiId: !Ref ApiGatewayRestApi
+
+  ApiGatewayModel:
+    Type: AWS::ApiGateway::Model
+    Properties:
+      ContentType: 'application/json'
+      RestApiId: !Ref ApiGatewayRestApi
+      Schema: {}
+
+  ApiGatewayStage:
+    Type: AWS::ApiGateway::Stage
+    Properties:
+      DeploymentId: !Ref ApiGatewayDeployment
+      Description: Lambda API Stage v0
+      RestApiId: !Ref ApiGatewayRestApi
+      StageName: !Ref StageName
+
+  ApiGatewayDeployment:
+    Type: AWS::ApiGateway::Deployment
+    DependsOn: [CurrentTempMethod]
+    Properties:
+      Description: Lambda API Deployment
+      RestApiId: !Ref ApiGatewayRestApi
+
+  ApiGatewayIamRole:
+    Type: AWS::IAM::Role
+    Properties:
+      AssumeRolePolicyDocument:
+        Version: '2012-10-17'
+        Statement:
+          - Sid: ''
+            Effect: 'Allow'
+            Principal:
+              Service:
+                - 'apigateway.amazonaws.com'
+            Action:
+              - 'sts:AssumeRole'
+      Path: '/'
+      Policies:
+        - PolicyName: LambdaAccess
+          PolicyDocument:
+            Version: '2012-10-17'
+            Statement:
+              - Effect: 'Allow'
+                Action: 'lambda:*'
+                Resource: !GetAtt CurrentTempFunction.Arn
+
+
+  CurrentTempFunction:
+    Type: AWS::Lambda::Function
+    Properties:
+      Description: AWS Lambda function
+      FunctionName: 'CurrentTemp-function'
+      Code:
+        S3Bucket: !Ref S3BucketName
+        S3Key: !Sub getTemp.zip
+      Handler: index.handler
+      MemorySize: 1024
+      Role: !GetAtt LambdaIamRole.Arn
+      Runtime: nodejs10.x
+      Timeout: 300
+      Environment:
+        Variables:
+          URI_MONGO_DB: !Ref MongoDBURI
+
+  LambdaIamRole:
+    Type: AWS::IAM::Role
+    Properties:
+      AssumeRolePolicyDocument:
+        Version: '2012-10-17'
+        Statement:
+          - Effect: 'Allow'
+            Principal:
+              Service:
+                - 'lambda.amazonaws.com'
+            Action:
+              - 'sts:AssumeRole'
+      Path: '/'
