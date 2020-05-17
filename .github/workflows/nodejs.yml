@@ -35,6 +35,6 @@ jobs:
       run: echo ${{ secrets.MongoDB }} >> config.env
     - name: Run build script 
       working-directory: .
-      run: sh build.sh   
+      run: export $(cat config.env | xargs) && sh build.sh
              
 
