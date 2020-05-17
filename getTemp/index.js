@@ -41,7 +41,7 @@ exports.handler = async () => {
       isBase64Encoded: false,
       headers : {"content-type" : "application/json"},
       statusCode: 200,
-      body: JSON.stringify({"timestamp": Math.round(Date.now()/1000), "pubdate": pubDate, "temp": 123}),
+      body: JSON.stringify({"timestamp": Math.round(Date.now()/1000), "pubdate": pubDate, "temp": temperature}),
     }
     return response
   } catch (err) {
