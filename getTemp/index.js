@@ -38,12 +38,16 @@ exports.handler = async () => {
 
     //Write response
     const response = {
+      isBase64Encoded: false,
+      headers : {"content-type" : "application/json"},
       statusCode: 200,
-      body: {"timestamp": Math.round(Date.now()/1000), "pubdate": pubDate, "temp": 100},
+      body: JSON.stringify({"timestamp": Math.round(Date.now()/1000), "pubdate": pubDate, "temp": 100}),
     }
     return response
   } catch (err) {
     const response = {
+      isBase64Encoded: false,
+      headers : {"content-type" : "application/json"},      
       statusCode: 500,
       body: JSON.stringify("InternalServerError"),
     }
