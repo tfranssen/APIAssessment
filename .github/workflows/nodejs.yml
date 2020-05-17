@@ -33,13 +33,8 @@ jobs:
     - name: Add secrets to config.env
       working-directory: .
       run: echo ${{ secrets.MongoDB }} >> config.env
-    - name: Install Clean Slate
-      working-directory: ./getTemp
-      run: npm ci
-    - name: Zip package
-      working-directory: ./getTemp 
-      run: rm -f getTemp.zip  && zip -r getTemp.zip .  
-    - name: Copy to AWS
-      working-directory: ./getTemp
-      run: aws s3 cp getTemp.zip s3://${{ secrets.BucketName }}/getTemp.zip
+    - name: Run build script 
+      working-directory: .
+      run: sh build.sh   
+             
 
