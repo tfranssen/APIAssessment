@@ -35,7 +35,7 @@ jobs:
       run: echo ${{ secrets.MongoDB }} >> config.env
     - name: Run build script 
       working-directory: .
-      run: export $(cat config.env | xargs) && sh update.sh
+      run: export $(cat config.env | xargs) && sh ./scripts/update.sh
     - name: Commit files
       run: |
         git config --local user.email "action@github.com"
