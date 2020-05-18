@@ -19,6 +19,14 @@ rm -f getTemp.zip
 rm -f -r node_modules
 cd ..
 
+echo "Upload getAverage function"
+cd getAverage
+
+rm -f getAverage.zip  && zip -r getAverage.zip .
+aws s3 cp getAverage.zip s3://$S3_BUCKET_NAME/getAverage-$version.zip
+rm -f getAverage.zip
+cd ..
+
 echo "Validating stack..."
 aws cloudformation validate-template --template-body file://cloudformation.yaml
 

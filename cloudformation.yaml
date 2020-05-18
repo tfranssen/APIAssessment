@@ -30,7 +30,14 @@ Resources:
       EndpointConfiguration:
         Types:
           - EDGE
-      Name: WeatherAPI
+      Name: ForecastRestApi
+
+  AverageTempResource:
+    Type: AWS::ApiGateway::Resource
+    Properties:
+      ParentId: !GetAtt ApiGatewayRestApi.RootResourceId
+      PathPart: 'avgtempinsfax'
+      RestApiId: !Ref ApiGatewayRestApi
 
   CurrentTempResource:
     Type: AWS::ApiGateway::Resource
@@ -39,13 +46,30 @@ Resources:
       PathPart: 'currenttempincovilha'
       RestApiId: !Ref ApiGatewayRestApi
 
+  AverageTempMethod:
+    Type: AWS::ApiGateway::Method
+    Properties:
+      ApiKeyRequired: false
+      AuthorizationType: NONE
+      HttpMethod: GET
+      Integration:
+        ConnectionType: INTERNET
+        Credentials: !GetAtt ApiGatewayIamRole.Arn
+        IntegrationHttpMethod: POST
+        PassthroughBehavior: WHEN_NO_MATCH
+        TimeoutInMillis: 29000
+        Type: AWS_PROXY
+        Uri: !Sub 'arn:aws:apigateway:${AWS::Region}:lambda:path/2015-03-31/functions/${AverageTempFunction.Arn}/invocations'
+      OperationName: 'avgtempinsfax'
+      ResourceId: !Ref AverageTempResource
+      RestApiId: !Ref ApiGatewayRestApi
 
   CurrentTempMethod:
     Type: AWS::ApiGateway::Method
     Properties:
       ApiKeyRequired: false
       AuthorizationType: NONE
-      HttpMethod: ANY
+      HttpMethod: GET
       Integration:
         ConnectionType: INTERNET
         Credentials: !GetAtt ApiGatewayIamRole.Arn
@@ -75,7 +99,7 @@ Resources:
 
   ApiGatewayDeployment:
     Type: AWS::ApiGateway::Deployment
-    DependsOn: [CurrentTempMethod]
+    DependsOn: [AverageTempMethod, CurrentTempMethod]
     Properties:
       Description: Lambda API Deployment
       RestApiId: !Ref ApiGatewayRestApi
@@ -101,8 +125,24 @@ Resources:
             Statement:
               - Effect: 'Allow'
                 Action: 'lambda:*'
+                Resource: !GetAtt AverageTempFunction.Arn
+              - Effect: 'Allow'
+                Action: 'lambda:*'
                 Resource: !GetAtt CurrentTempFunction.Arn
 
+  AverageTempFunction:
+    Type: AWS::Lambda::Function
+    Properties:
+      Description: AWS Lambda function
+      FunctionName: 'AverageTemp-function'
+      Code:
+        S3Bucket: !Ref S3BucketName
+        S3Key: !Sub getAverage-${CurrentTempFunctionVersion}.zip
+      Handler: index.handler
+      MemorySize: 256
+      Role: !GetAtt LambdaIamRole.Arn
+      Runtime: nodejs10.x
+      Timeout: 60
 
   CurrentTempFunction:
     Type: AWS::Lambda::Function
