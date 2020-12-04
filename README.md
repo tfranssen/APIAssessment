@@ -16,7 +16,7 @@ This scripts creates S3 bucket, uploads functions and creates stack using Cloud 
 - `S3_BUCKET_REGION`  AWS Region
 - `URI_MONGO_DB`  URI of Mongo Atlas
 
-## Update
+## Update*
 Updating is done using Git Actions. An update workflow is started after each push to master branch.
 
 ## Delete
